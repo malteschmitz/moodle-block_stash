@@ -20,10 +20,10 @@
 <div class="block-stash-trade-snippet-dialogue">
     <div id="{{uuid}}" style="display: inline;">
         <div class="block-stash-trade" title="{{trade.name}}" data-id="{{trade.id}}">
-            <div class="trade-label text-center p-y-1 p-x-1">{{trade.name}}</div>
+            <div class="trade-label text-center py-1 px-1">{{trade.name}}</div>
                 <div>
                     <div style="display: flex">
-                        <div style="flex: 1" class="p-a-1">
+                        <div style="flex: 1" class="px-2 py-2">
                             <div class="block-stash-column-title"><strong>{{trade.gaintitle}}</strong></div>
                             {{#tradeitems}}
                                 {{#gainloss}}
@@ -35,7 +35,7 @@
                                 {{/gainloss}}
                             {{/tradeitems}}
                         </div>
-                        <div style="flex: 1" class="p-a-1">
+                        <div style="flex: 1" class="px-2 py-2">
                             <div class="block-stash-column-title"><strong>{{trade.losstitle}}</strong></div>
                             {{#tradeitems}}
                                 {{^gainloss}}

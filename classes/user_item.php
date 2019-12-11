@@ -50,6 +50,10 @@ class user_item extends persistent {
                 'type' => PARAM_INT,
                 'default' => null,
                 'null' => NULL_ALLOWED
+            ],
+            'version' => [
+                'type' => PARAM_TEXT,
+                'default' => 0,
             ]
         ];
     }
@@ -99,8 +103,9 @@ class user_item extends persistent {
 
         $records = $DB->get_recordset_sql($sql, [$userid, $stashid]);
         foreach ($records as $record) {
-            $result[] = (object) [
-                'item' => new item(null, item::extract_record($record, 'item')),
+            $item = new item(null, item::extract_record($record, 'item'));
+            $result[$item->get_id()] = (object) [
+                'item' => $item,
                 'useritem' => new self(null, self::extract_record($record, 'useritem'))
             ];
         }

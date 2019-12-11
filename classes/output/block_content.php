@@ -63,12 +63,19 @@ class block_content implements renderable, templatable {
             $data['items'][] = $exported;
         }
 
+        $swaphandler = new \block_stash\swap_handler($this->manager);
+        $swapcount = $swaphandler->get_unread_requests($userid);
+
         $data['id'] = $this->manager->get_stash()->get_id();
         $data['canacquireitems'] = $this->manager->can_acquire_items();
         $data['canmanage'] = $this->manager->can_manage();
         $data['hasitems'] = !empty($useritems);
         $data['inventoryurl'] = new moodle_url('/blocks/stash/items.php', array('courseid' => $this->manager->get_courseid()));
         $data['reporturl'] = new moodle_url('/blocks/stash/report.php', array('courseid' => $this->manager->get_courseid()));
+        $data['canswap'] = $this->manager->is_swapping_enabled();
+        $data['tradecenterurl'] = new moodle_url('/blocks/stash/tradecenter.php', array('courseid' => $this->manager->get_courseid()));
+        $data['offersurl'] = new moodle_url('/blocks/stash/swaprequests.php', array('courseid' => $this->manager->get_courseid()));
+        $data['swapcount'] = $swapcount ?: false;
         return $data;
     }
 

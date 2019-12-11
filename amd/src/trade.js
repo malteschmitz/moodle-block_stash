@@ -16,7 +16,6 @@
 /**
  * Trade module.
  *
- * @package    block_stash
  * @copyright  2017 Adrian Greeve - adriangreeve.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -35,7 +34,7 @@ define([
     /**
      * Trade class.
      *
-     * @param {Object} dropdata The data of this trade widget.
+     * @param {Object} tradedata The data of this trade widget.
      */
     function Trade(tradedata) {
         Base.prototype.constructor.apply(this, [tradedata]);

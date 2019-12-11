@@ -45,6 +45,7 @@ use block_stash\external\user_item_summary_exporter;
 use block_stash\external\trade_items_exporter;
 use block_stash\external\trade_summary_exporter;
 use block_stash\external\items_exporter;
+use block_stash\external\user_stash_exporter;
 
 /**
  * External API class.
@@ -424,6 +425,103 @@ class external extends external_api {
      */
     public static function complete_trade_returns() {
         return trade_summary_exporter::get_read_structure();
+    }
+
+    /**
+     * External function parameter structure.
+     * @return external_function_parameters
+     */
+    public static function get_stash_for_user_parameters() {
+        return new external_function_parameters([
+            'courseid' => new external_value(PARAM_INT),
+            'userid' => new external_value(PARAM_INT),
+        ]);
+    }
+
+    public static function get_stash_for_user($courseid, $userid) {
+        global $PAGE;
+        $params = self::validate_parameters(self::get_stash_for_user_parameters(), compact('courseid', 'userid'));
+        $courseid = $params['courseid'];
+        $userid = $params['userid'];
+
+        $manager = manager::get($courseid);
+        self::validate_context($manager->get_context());
+
+        $stashitems = $manager->get_all_user_items_in_stash($userid);
+
+        if (empty($stashitems)) {
+            throw new \moodle_exception('nostashitems');
+        }
+
+        // Remove items with 0 as a quantity.
+        foreach ($stashitems as $key => $item) {
+            $quantity = $item->useritem->get_quantity();
+            if ($quantity == 0) {
+                unset($stashitems[$key]);
+            }
+        }
+
+        $exporter = new user_stash_exporter([], ['context' => $manager->get_context(),
+                                                 'useritems' => $stashitems]);
+        $output = $PAGE->get_renderer('block_stash');
+        $records = $exporter->export($output);
+        return $records;
+    }
+
+    /**
+     * External function return value.
+     *
+     * @return external_value
+     */
+    public static function get_stash_for_user_returns() {
+        return user_stash_exporter::get_read_structure();
+    }
+
+    public static function create_swap_request_parameters() {
+        return new external_function_parameters([
+            'userid' => new external_value(PARAM_INT),
+            'myuserid' => new external_value(PARAM_INT),
+            'courseid' => new external_value(PARAM_INT),
+            'items' => new external_multiple_structure (
+                new external_single_structure(
+                    [
+                        'id' => new external_value(PARAM_INT),
+                        'quantity' => new external_value(PARAM_INT)
+                    ]
+                )
+            ),
+            'myitems' => new external_multiple_structure (
+                new external_single_structure(
+                    [
+                        'id' => new external_value(PARAM_INT),
+                        'quantity' => new external_value(PARAM_INT)
+                    ]
+                )
+            )
+        ]);
+    }
+
+    public static function create_swap_request($userid, $myuserid, $courseid, $items, $myitems) {
+        $params = self::validate_parameters(self::create_swap_request_parameters(),
+                compact('userid', 'myuserid', 'courseid', 'items', 'myitems'));
+
+        $userid = $params['userid'];
+        $myuserid = $params['myuserid'];
+        $courseid = $params['courseid'];
+        $items = $params['items'];
+        $myitems = $params['myitems'];
+
+        $manager = manager::get($courseid);
+        $swaphandler = new \block_stash\swap_handler($manager);
+        self::validate_context($manager->get_context());
+
+        $swaphandler->create_swap_request($userid, $myuserid, $items, $myitems);
+
+        return true;
+    }
+
+    public static function create_swap_request_returns() {
+        return new external_value(PARAM_BOOL);
     }
 
 }

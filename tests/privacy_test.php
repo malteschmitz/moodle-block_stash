@@ -34,6 +34,8 @@ use core_privacy\local\request\writer;
 use block_stash\privacy\provider;
 use block_stash\drop_pickup;
 use block_stash\user_item;
+use block_stash\manager;
+use block_stash\swap_handler;
 
 /**
  * Data provider testcase class.
@@ -46,7 +48,7 @@ use block_stash\user_item;
  */
 class block_stash_privacy_testcase extends advanced_testcase {
 
-    public function setUp() {
+    public function setUp(): void {
         if (!class_exists('core_privacy\manager')) {
             $this->markTestSkipped('Moodle versions does not support privacy subsystem.');
         }
@@ -262,6 +264,54 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals($d2a->get_name(), $drop['location']);
         $this->assertEquals(23, $drop['quantity']);
         $this->assertEquals(transform::datetime($now - DAYSECS), $drop['last_pickup']);
+    }
+
+    public function test_swaps() {
+        global $DB;
+
+        // print_object('yessss');
+        $dg = $this->getDataGenerator();
+        $sg = $dg->get_plugin_generator('block_stash');
+
+        $c1 = $dg->create_course();
+        $c2 = $dg->create_course();
+        $u1 = $dg->create_user();
+        $u2 = $dg->create_user();
+        $c1ctx = context_course::instance($c1->id);
+        $c2ctx = context_course::instance($c2->id);
+
+        $now = time();
+        $path = [get_string('pluginname', 'block_stash')];
+
+        $s1 = $sg->create_stash(['courseid' => $c1->id]);
+        $s2 = $sg->create_stash(['courseid' => $c2->id]);
+        $i1a = $sg->create_item(['stash' => $s1]);
+        $d1a = $sg->create_drop(['item' => $i1a]);
+        $i1b = $sg->create_item(['stash' => $s1]);
+        $d1b = $sg->create_drop(['item' => $i1b]);
+        $d1b2 = $sg->create_drop(['item' => $i1b]);
+        $i1c = $sg->create_item(['stash' => $s1]);
+        $i2a = $sg->create_item(['stash' => $s2]);
+        $d2a = $sg->create_drop(['item' => $i2a]);
+
+        $sg->create_user_item(['item' => $i1a, 'userid' => $u1->id, 'quantity' => 2]);
+        $sg->create_user_item(['item' => $i1b, 'userid' => $u2->id, 'quantity' => 1]);
+        $sg->create_user_item(['item' => $i2a, 'userid' => $u1->id]);
+        $sg->create_user_item(['item' => $i1a, 'userid' => $u2->id, 'quantity' => 3]);
+
+        $manager = manager::get($c1->id);
+        $manager->set_enabled();
+        $swaphandler = new swap_handler($manager);
+        $first[] = ['id' => $i1a->get_id(), 'quantity' => 2];
+        $second[] = ['id' => $i1b->get_id(), 'quantity' => 1];
+        $this->setUser($u2);
+        // $student = $DB->get_record('role', array('shortname' => 'student'), '*', MUST_EXIST);
+        // role_assign($student->id, $u2->id, $c1ctx->id);
+        // $test = assign_capability('block/stash:view', CAP_ALLOW, $u2->id, $c1ctx->id, true);
+        // print_object($test);
+        $swaphandler->create_swap_request($u1->id, $u2->id, $first, $second);
+
+        provider::export_user_data(new approved_contextlist($u2, 'block_stash', [$c1ctx->id]));
     }
 
 }

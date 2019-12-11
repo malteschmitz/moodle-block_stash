@@ -40,9 +40,14 @@ class block_stash_edit_form extends block_edit_form {
         $mform->addElement('text', 'config_title', get_string('configurationtitle', 'block_stash'));
         $mform->setType('config_title', PARAM_TEXT);
 
+        $mform->addElement('advcheckbox', 'config_useritemswap', get_string('useritemswap', 'block_stash'));
+        $mform->setType('config_useritemswap', PARAM_BOOL);
+        $mform->setDefault('config_useritemswap', 1);
+
     }
 
     public function set_data($defaults) {
+        // print_object($defaults);
 
         if (!$this->block->user_can_edit() && !empty($this->block->config->title)) {
             // If a title has been set but the user cannot edit it format it nicely.

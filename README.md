@@ -11,11 +11,12 @@ Features
 - Set objects to automatically re-appear after a delay to boost engagement
 - Unlock access to activities based on the objects found (requires plugin [availability_stash](https://moodle.org/plugins/availability_stash))
 - Trade by exchanging items for different items (requires plugin [filter plugin](https://moodle.org/plugins/filter_stash))
+- Allow students to trade items with each other in the trade center.
 
 Requirements
 ------------
 
-Moodle 3.1 or greater.
+Moodle 4.1.2 or greater.
 
 Installation
 ------------
