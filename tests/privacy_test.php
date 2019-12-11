@@ -34,6 +34,8 @@ use core_privacy\local\request\writer;
 use block_stash\privacy\provider;
 use block_stash\drop_pickup;
 use block_stash\user_item;
+use block_stash\manager;
+use block_stash\swap_handler;
 
 /**
  * Data provider testcase class.
@@ -46,7 +48,7 @@ use block_stash\user_item;
  */
 class block_stash_privacy_testcase extends advanced_testcase {
 
-    public function setUp() {
+    public function setUp(): void {
         if (!class_exists('core_privacy\manager')) {
             $this->markTestSkipped('Moodle versions does not support privacy subsystem.');
         }
@@ -263,5 +265,4 @@ class block_stash_privacy_testcase extends advanced_testcase {
         $this->assertEquals(23, $drop['quantity']);
         $this->assertEquals(transform::datetime($now - DAYSECS), $drop['last_pickup']);
     }
-
 }

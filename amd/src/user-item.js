@@ -16,7 +16,6 @@
 /**
  * User item module.
  *
- * @package    block_stash
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,6 +28,7 @@ define([
      * UserItem class.
      *
      * @param {Object} data Data of the item.
+     * @param {Object} item Item information.
      */
     function UserItem(data, item) {
         Base.prototype.constructor.apply(this, [data]);

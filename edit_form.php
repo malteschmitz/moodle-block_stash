@@ -40,6 +40,10 @@ class block_stash_edit_form extends block_edit_form {
         $mform->addElement('text', 'config_title', get_string('configurationtitle', 'block_stash'));
         $mform->setType('config_title', PARAM_TEXT);
 
+        $mform->addElement('advcheckbox', 'config_useritemswap', get_string('useritemswap', 'block_stash'));
+        $mform->setType('config_useritemswap', PARAM_BOOL);
+        $mform->setDefault('config_useritemswap', 1);
+
     }
 
     public function set_data($defaults) {

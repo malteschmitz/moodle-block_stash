@@ -517,7 +517,7 @@ class manager {
      */
     public function get_all_user_items_in_stash($userid) {
         $this->require_enabled();
-        $this->require_view();
+        $this->require_view($userid);
 
         return user_item::get_all_in_stash($userid, $this->get_stash()->get_id());
     }
@@ -581,6 +581,13 @@ class manager {
             ]);
         }
         return $this->isenabled;
+    }
+
+    public function set_enabled() {
+        if (!defined('PHPUNIT_TEST') || !PHPUNIT_TEST) {
+            throw new \moodle_exception("This function can only be used for unit testing.");
+        }
+        $this->isenabled = true;
     }
 
     /**
@@ -1145,5 +1152,25 @@ class manager {
         $config = unserialize(base64_decode($record->configdata));
 
         return isset($config->title) ? format_string($config->title) : format_string(get_string('pluginname', 'block_stash'));
+    }
+
+    /**
+     * Check if user item swapping is enabled for the Stash block instance in the current context.
+     *
+     * @return bool True if user item swapping is enabled, false otherwise.
+     */
+    public function is_swapping_enabled(): bool {
+        global $DB;
+
+        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
+                '*', MUST_EXIST);
+        $config = unserialize(base64_decode($record->configdata));
+        // If nothing is set, then the default is true.
+        if (empty($config)) {
+            $config = (object) ['useritemswap' => true];
+        } else if (!isset($config->useritemswap)) {
+            $config->useritemswap = true;
+        }
+        return $config->useritemswap;
     }
 }

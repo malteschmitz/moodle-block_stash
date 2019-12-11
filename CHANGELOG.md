@@ -1,6 +1,13 @@
 Block Stash
 ===========
 
+Version 2.0 (19 April 2023)
+---------------------------
+
+* Added user trades. Students can now send and accept trade requests from each other. This setting is on by default, but can be turned off in the block settings.
+  Turn editing on and an edit cog will appear with a menu. Click configure block.
+* This new version uses a lot of current code and so the minimum Moodle version is 4.1.2.
+
 Version 1.3.3 (2nd January 2020)
 ----------------------------------
 

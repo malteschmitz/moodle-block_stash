@@ -37,3 +37,8 @@
         {{/items}}
     </div>
 </div>
+{{#js}}
+require(["block_stash/swap"], function(Swap) {
+    Swap.init();
+});
+{{/js}}

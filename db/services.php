@@ -77,4 +77,36 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_get_user_stash_items' => [
+        'classname'    => 'block_stash\\external',
+        'methodname'   => 'get_stash_for_user',
+        'description'  => 'Get the stash of a user.',
+        'type'         => 'read',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
+    'block_stash_create_swap_request' => [
+        'classname'    => 'block_stash\\external',
+        'methodname'   => 'create_swap_request',
+        'description'  => 'Create a request to swap items between users',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
+    'block_stash_get_swap_items_for_search_widget' => [
+        'classname' => 'block_stash\\external\\itemlist',
+        'methodname' => 'get_swap_items_for_search_widget',
+        'description' => 'Gets available items for a swap',
+        'type' => 'read',
+        'capabilities' => '',
+        'ajax' => true
+    ],
+    'block_stash_get_users_for_search_widget' => [
+        'classname' => 'block_stash\\external\\userlist',
+        'methodname' => 'get_users_for_search_widget',
+        'description' => 'Gets available items for a swap',
+        'type' => 'read',
+        'capabilities' => '',
+        'ajax' => true
+    ],
 ];

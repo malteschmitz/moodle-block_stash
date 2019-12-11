@@ -16,7 +16,6 @@
 /**
  * Trade snippet maker module.
  *
- * @package    block_stash
  * @copyright  2017 Adrian Greeve - adriangreeve.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

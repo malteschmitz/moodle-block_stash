@@ -32,6 +32,7 @@ use block_stash\drop;
 use block_stash\drop_pickup;
 use block_stash\item;
 use block_stash\stash;
+use block_stash\swap;
 use block_stash\user_item;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
@@ -77,6 +78,17 @@ class provider implements
             'timemodified' => 'privacy:metadata:pickup:timemodified',
         ], 'privacy:metadata:pickup');
 
+        $collection->add_database_table(swap::TABLE, [
+            'stashid' => 'privacy:metadata:swap:stashid',
+            'initiator' => 'privacy:metadata:swap:initiator',
+            'receiver' => 'privacy:metadata:swap:receiver',
+            'message' => 'privacy:metadata:swap:message',
+            'messageformat' => 'privacy:metadata:swap:messageformat',
+            'status' => 'privacy:metadata:swap:status',
+            'timecreated' => 'privacy:metadata:swap:timecreated',
+            'timemodified' => 'privacy:metadata:swap:timemodified',
+        ], 'privacy:metadata:swap');
+
         return $collection;
     }
 
@@ -120,6 +132,18 @@ class provider implements
         $contextlist->add_from_sql($sql, [
             'courselevel' => CONTEXT_COURSE,
             'userid' => $userid,
+        ]);
+
+        $sql = "SELECT ctx.id
+                  FROM {block_stash_swap} ss
+                  JOIN {block_stash} s ON ss.stashid = s.id
+                  JOIN {context} ctx ON ctx.instanceid = s.courseid AND ctx.contextlevel = :contextlevel
+                 WHERE ss.initiator = :initiatorid OR ss.receiver = :receiverid";
+
+        $contextlist->add_from_sql($sql, [
+            'contextlevel' => CONTEXT_COURSE,
+            'initiatorid' => $userid,
+            'receiverid' => $userid,
         ]);
 
         return $contextlist;
@@ -202,6 +226,45 @@ class provider implements
                 (object) ['items' => array_values($data)]
             );
         });
+
+        // Export swap requests.
+        $swapsql = "SELECT (CASE WHEN (sd.id IS NULL) THEN (" . $DB->sql_concat('ss.id', "'_'", '0') . ") ELSE
+                      (" . $DB->sql_concat('ss.id', "'_'", 'sd.id') . ") END)  AS uniqueid, ss.id, ss.initiator, ss.receiver,
+                      ss.status, ss.timecreated, ui.userid, sd.quantity, i.name, s.courseid
+                      FROM {block_stash_swap} ss
+                      JOIN {block_stash} s ON ss.stashid = s.id
+                 LEFT JOIN {block_stash_swap_detail} sd ON sd.swapid = ss.id
+                 LEFT JOIN {block_stash_user_items} ui ON sd.useritemid = ui.id
+                 LEFT JOIN {block_stash_items} i ON ui.itemid = i.id
+                     WHERE (ss.initiator = :userid OR ss.receiver = :ruserid)
+                       AND s.courseid $insql";
+        // print_object($swapsql);
+        $params = array_merge($inparams, ['userid' => $userid, 'ruserid' => $userid]);
+        $recordset = $DB->get_recordset_sql($swapsql, $params);
+        static::recordset_loop_and_export($recordset, 'courseid', [], function($carry, $record) {
+
+            $userid = $record->userid ?? 0;
+
+            $carry[$record->uniqueid][$userid] = [
+                'tradeid' => $record->id,
+                'item' => $record->name ?? get_string('notrecorded', 'block_stash'),
+                'quantity' => $record->quantity,
+                'intiatorid' => $record->initiator,
+                'recieverid' => $record->receiver,
+                'timecreated' => transform::datetime($record->timecreated),
+                'status' => static::transform_swap_status($record->status)
+            ];
+
+            return $carry;
+
+
+        }, function($courseid, $data) {
+            writer::with_context(context_course::instance($courseid))->export_related_data(
+                [get_string('pluginname', 'block_stash')],
+                'trades',
+                (object) ['trades' => array_values($data)]
+            );
+        });
     }
 
     /**
@@ -234,6 +297,24 @@ class provider implements
         // Delete the drop pickups.
         list($insql, $inparams) = $DB->get_in_or_equal($dropids, SQL_PARAMS_NAMED);
         $DB->delete_records_select(drop_pickup::TABLE, "dropid $insql", $inparams);
+
+        // Delete all swap details and then swaps.
+        $swapdetailids = static::get_swap_detail_ids_from_courseids([$context->instanceid]);
+        if (empty($swapdetailids)) {
+            return;
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($swapdetailids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select('block_stash_swap_detail', "id $insql", $inparams);
+
+        $stashids = static::get_stashids_from_courseids([$context->instanceid]);
+        if (empty($stashids)) {
+            return;
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($stashids, SQL_PARAMS_NAMED);
+        $DB->delete_records_select('block_stash_swap', "stashid $insql", $inparams);
+
     }
 
     /**
@@ -243,6 +324,7 @@ class provider implements
      */
     public static function _delete_data_for_user(approved_contextlist $contextlist) {
         global $DB;
+
         $userid = $contextlist->get_user()->id;
 
         $courseids = array_map(function($context) {
@@ -252,25 +334,47 @@ class provider implements
         }));
 
         $itemids = static::get_itemids_from_courseids($courseids);
-        if (empty($itemids)) {
-            return;
+        if (!empty($itemids)) {
+
+            // Delete the items a user has.
+            list($initemsql, $initemparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+            $params = array_merge($initemparams, ['userid' => $userid]);
+            $DB->delete_records_select(user_item::TABLE, "userid = :userid AND itemid $initemsql", $params);
+
+            // Find the relevant drop IDs.
+            $dropids = static::get_dropids_from_itemids($itemids);
+            if (!empty($dropids)) {
+                // Delete the drop pickups.
+                list($indropsql, $indropparams) = $DB->get_in_or_equal($dropids, SQL_PARAMS_NAMED);
+                $params = array_merge($indropparams, ['userid' => $userid]);
+                $DB->delete_records_select(drop_pickup::TABLE, "userid = :userid AND dropid $indropsql", $params);
+            }
         }
 
-        // Delete the items a user has.
-        list($initemsql, $initemparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
-        $params = array_merge($initemparams, ['userid' => $userid]);
-        $DB->delete_records_select(user_item::TABLE, "userid = :userid AND itemid $initemsql", $params);
+        list($coursesql, $courseparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
 
-        // Find the relevant drop IDs.
-        $dropids = static::get_dropids_from_itemids($itemids);
-        if (empty($dropids)) {
-            return;
-        }
+        // Delete swaps and swap detail.
+        $sql = "SELECT sd.id
+                  FROM {block_stash_swap_detail} sd
+                  JOIN {block_stash_swap} ss ON ss.id = sd.swapid
+                  JOIN {block_stash} s ON s.id = ss.stashid
+                  JOIN {course} c ON s.courseid = c.id
+                 WHERE (ss.initiator = :iuserid OR ss.receiver = :ruserid)
+                   AND c.id $coursesql";
+        $params = array_merge($courseparams, ['iuserid' => $userid, 'ruserid' => $userid]);
+        $swapdetailids = $DB->get_records_sql($sql, $params);
 
-        // Delete the drop pickups.
-        list($indropsql, $indropparams) = $DB->get_in_or_equal($dropids, SQL_PARAMS_NAMED);
-        $params = array_merge($indropparams, ['userid' => $userid]);
-        $DB->delete_records_select(drop_pickup::TABLE, "userid = :userid AND dropid $indropsql", $params);
+        $DB->delete_records_list('block_stash_swap_detail', 'id', array_keys($swapdetailids));
+
+        $sql = "SELECT ss.id
+                  FROM {block_stash_swap} ss
+                  JOIN {block_stash} s ON s.id = ss.stashid
+                  JOIN {course} c ON c.id = s.courseid
+                 WHERE (ss.initiator = :iuserid OR ss.receiver = :ruserid)
+                   AND c.id $coursesql";
+
+        $swapids = $DB->get_records_sql($sql, $params);
+        $DB->delete_records_list('block_stash_swap', 'id', array_keys($swapids));
     }
 
     /**
@@ -310,6 +414,37 @@ class provider implements
         return $DB->get_fieldset_sql($sql, $inparams);
     }
 
+    protected static function get_swap_detail_ids_from_courseids(array $courseids) {
+        global $DB;
+
+        if (empty($courseids)) {
+            return [];
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        $sql = "SELECT sd.id
+                  FROM {block_stash_swap_detail} sd
+                  JOIN {block_stash_swap} ss ON ss.id = sd.swapid
+                  JOIN {block_stash} s ON s.id = ss.stashid
+                 WHERE s.courseid $insql";
+        return $DB->get_fieldset_sql($sql, $inparams);
+
+    }
+
+    protected static function get_stashids_from_courseids(array $courseids) {
+        global $DB;
+
+        if (empty($courseids)) {
+            return [];
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($courseids, SQL_PARAMS_NAMED);
+        $sql = "SELECT s.id
+                  FROM {block_stash} s
+                 WHERE s.courseid $insql";
+        return $DB->get_fieldset_sql($sql, $inparams);
+    }
+
     /**
      * Loop and export from a recordset.
      *
@@ -338,6 +473,25 @@ class provider implements
 
         if (!empty($lastid)) {
             $export($lastid, $data);
+        }
+    }
+
+    private static function transform_swap_status($statuscode) {
+        switch ($statuscode) {
+            case swap::BLOCK_STASH_SWAP_DECLINE:
+                return get_string('tradestatusdeclined', 'block_stash');
+                break;
+            case swap::BLOCK_STASH_SWAP_VIEWED:
+                return get_string('tradestatusviewed', 'block_stash');
+                break;
+            case swap::BLOCK_STASH_SWAP_COMPLETED:
+                return get_string('tradestatuscompleted', 'block_stash');
+                break;
+            case swap::BLOCK_STASH_SWAP_APPROVE:
+                return get_string('tradestatusapproved', 'block_stash');
+                break;
+            default:
+                return get_string('notrecorded', 'block_stash');
         }
     }
 

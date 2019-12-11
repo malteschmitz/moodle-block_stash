@@ -18,7 +18,6 @@
  *
  * This simply allows for data to be added and fetched from an object.
  *
- * @package    block_stash
  * @copyright  2016 Frédéric Massart - FMCorz.net
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
