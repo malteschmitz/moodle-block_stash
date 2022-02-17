@@ -395,10 +395,12 @@ class external extends external_api {
         $gaineditems = [];
         if ($summarydata) {
             foreach ($summarydata['acquireditems'] as $gaineditem) {
+                $gaineditems[$gaineditem->get_itemid()] = new stdClass();
                 $gaineditems[$gaineditem->get_itemid()]->item = $manager->get_item($gaineditem->get_itemid());
                 $gaineditems[$gaineditem->get_itemid()]->useritem = $manager->get_user_item($USER->id, $gaineditem->get_itemid());
             }
             foreach ($summarydata['removeditems'] as $removeditem) {
+                $removeditems[$removeditem->get_itemid()] = new stdClass();
                 $removeditems[$removeditem->get_itemid()]->item = $manager->get_item($removeditem->get_itemid());
                 $removeditems[$removeditem->get_itemid()]->useritem = $manager->get_user_item($USER->id,
                     $removeditem->get_itemid());
