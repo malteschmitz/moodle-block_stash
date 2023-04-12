@@ -109,4 +109,12 @@ $functions = [
         'capabilities' => '',
         'ajax' => true
     ],
+    'block_stash_get_all_drops' => [
+        'classname'    => 'block_stash\\external\\dropwidget_select_data',
+        'methodname'   => 'get_all_drop_data',
+        'description'  => 'Get all drop data for a items and trades',
+        'type'         => 'read',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];

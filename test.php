@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Items page.
+ * Trade edit page.
  *
  * @package    block_stash
- * @copyright  2016 Adrian Greeve <adriangreeve.com>
+ * @copyright  2017 Adrian Greeve <adriangreeve.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -35,3 +35,6 @@ $contextlist = new \core_privacy\local\request\approved_contextlist($user, 'bloc
 // print_object($contextlist);
 
 \block_stash\privacy\provider::_delete_data_for_user($contextlist);
+$contextid = required_param('contextid', PARAM_INT);
+
+\block_stash\external\dropwidget_select_data::get_all_drop_data($contextid);

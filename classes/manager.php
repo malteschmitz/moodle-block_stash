@@ -1139,6 +1139,23 @@ class manager {
         }
     }
 
+    public function get_drops_for_items_and_trade() {
+        global $DB;
+
+        $stash = $this->get_stash();
+
+        $sql = "SELECT sd.id, sd.name as location, sd.hashcode, sd.itemid, i.name
+                  FROM {block_stash_drops} sd
+                  JOIN {block_stash_items} i ON i.id = sd.itemid
+                 WHERE i.stashid = :stashid";
+
+        $params = ['stashid' => $stash->get_id()];
+
+        $items = $DB->get_records_sql($sql, $params);
+        $trades = $this->get_trades();
+        return ['items' => $items, 'trades' => $trades];
+    }
+
     /**
      * Horrible way to retrieve the title for the block.
      *
