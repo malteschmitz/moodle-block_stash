@@ -63,7 +63,7 @@ echo $OUTPUT->header();
 $tradeurl = new moodle_url('/blocks/stash/tradecenter.php', ['courseid' => $courseid]);
 $offerurl = new moodle_url('/blocks/stash/swaprequests.php', ['courseid' => $courseid]);
 $navdata = [
-    'header' => 'Trade details',
+    'header' => get_string('tradedetails','block_stash'),
     'tradeurl' => $tradeurl->out(false),
     'offerurl' => $offerurl->out(false)
 ];

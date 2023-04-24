@@ -52,6 +52,7 @@ if (!is_null($itemid)) {
     $data['users'] = $swaphandler->get_users_with_item($itemid, $USER->id);
     array_map(function($user) use ($OUTPUT) {
         $user->pic = $OUTPUT->user_picture($user);
+        $user->fullname = \fullname($user);
         return $user;
     }, $data['users']);
     $data['zerostate'] = false;

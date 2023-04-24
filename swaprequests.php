@@ -25,6 +25,7 @@
 require_once(__DIR__ . '/../../config.php');
 
 $courseid = required_param('courseid', PARAM_INT);
+$swapid = optional_param('id', null, PARAM_INT);
 
 require_login($courseid);
 
@@ -36,7 +37,15 @@ if (!$manager->is_swapping_enabled()) {
 $swaphandler = new \block_stash\swap_handler($manager);
 
 $userid = $USER->id;
-$data = $swaphandler->get_users_swap_requests($userid);
+
+if (!is_null($swapid)) {
+    if ($swaphandler->veryify_my_swap_offers($swapid, $userid)) {
+        $swaphandler->delete_swap($swapid);
+    }
+}
+
+$renderer = $PAGE->get_renderer('block_stash');
+$swaprequests = new \block_stash\output\swap_requests($manager, $swaphandler, $userid);
 
 $url = new moodle_url('/blocks/stash/swaprequests.php', ['courseid' => $courseid]);
 $PAGE->set_url($url);
@@ -48,23 +57,12 @@ $PAGE->set_heading($context->get_context_name());
 echo $OUTPUT->header();
 $tradeurl = new moodle_url('/blocks/stash/tradecenter.php', ['courseid' => $courseid]);
 $navdata = [
-    'header' => 'Offers',
+    'header' => get_string('offers','block_stash'),
     'tradeurl' => $tradeurl->out(false),
     'offerurl' => $url->out(false)
 ];
 
 echo $OUTPUT->render_from_template('block_stash/local/tertiary_navigation/swap-nav', $navdata);
-
-if (!empty($data['requests'])) {
-    $data['haverequests'] = true;
-}
-if (!empty($data['offers'])) {
-    $data['haveoffers'] = true;
-}
-
-if (empty($data['requests']) && empty($data['offers'])) {
-    $data['zero'] = true;
-}
-echo $OUTPUT->render_from_template('block_stash/local/swap/swap_requests', $data);
+echo $renderer->render_swaprequests($swaprequests);
 
 echo $OUTPUT->footer();

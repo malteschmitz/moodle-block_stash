@@ -129,6 +129,13 @@ class swap {
         }
     }
 
+    public function delete() {
+        global $DB;
+
+        $DB->delete_records(self::TABLE_DETAIL, ['swapid' => $this->id]);
+        $DB->delete_records(self::TABLE, ['id' => $this->id]);
+    }
+
     public static function load($swapid, $detailsaswell = false) {
         global $DB;
         $record = $DB->get_record(self::TABLE, ['id' => $swapid]);

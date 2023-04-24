@@ -49,6 +49,11 @@ class swap_handler {
         $swap->save();
     }
 
+    public function delete_swap($swapid) {
+        $swap = swap::load($swapid);
+        $swap->delete();
+    }
+
     /**
      * Retrieve the swap requests for a given user.
      *
@@ -66,9 +71,15 @@ class swap_handler {
                   FROM {block_stash_swap} s
              LEFT JOIN {user} u ON s.initiator = u.id
              LEFT JOIN {user} ru ON s.receiver = ru.id
-                 WHERE (s.receiver = :ruserid OR s.initiator = :iuserid) AND (s.status IS NULL OR s.status = :viewed)";
+                 WHERE (s.receiver = :ruserid OR s.initiator = :iuserid)
+                   AND (s.status IS NULL OR s.status = :viewed OR s.status = :completed)";
 
-        $params = ['ruserid' => $userid, 'iuserid' => $userid,'viewed' => \block_stash\swap::BLOCK_STASH_SWAP_VIEWED];
+        $params = [
+            'ruserid' => $userid,
+            'iuserid' => $userid,
+            'viewed' => swap::BLOCK_STASH_SWAP_VIEWED,
+            'completed' => swap::BLOCK_STASH_SWAP_COMPLETED
+        ];
 
         $records = $DB->get_records_sql($sql, $params);
 
@@ -76,7 +87,9 @@ class swap_handler {
         $offers = [];
         foreach ($records as $record) {
             if ($record->initiator != $userid) {
-                $requests[] = $record;
+                if ($record->status != swap::BLOCK_STASH_SWAP_COMPLETED) {
+                    $requests[] = $record;
+                }
             } else {
                 $offers[] = $record;
             }

@@ -64,12 +64,17 @@
             <td>{{first}} {{last}}</td>
             <td>{{#userdate}}{{timecreated}}, {{#str}} strftimedatetime, langconfig {{/str}}{{/userdate}}</td>
             {{#status}}
-            <td></td>
+            <td>{{status}}</td>
             {{/status}}
             {{^status}}
-            <td>{{#str}}new, block_stash{{/str}}</td>
+            <td></td>
             {{/status}}
-            <td><a href="swapofferdetail.php?courseid={{courseid}}&id={{id}}">{{#str}}view, block_stash{{/str}}</a></td>
+            <td>
+                <a href="swapofferdetail.php?courseid={{courseid}}&id={{id}}">{{#str}}view, block_stash{{/str}}</a>
+                {{#delete}}
+                {{> core/action_link}}
+                {{/delete}}
+            </td>
         </tr>
         {{/offers}}
     </tbody>

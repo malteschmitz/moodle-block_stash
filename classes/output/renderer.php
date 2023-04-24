@@ -234,4 +234,9 @@ class renderer extends plugin_renderer_base {
         return parent::render_from_template('block_stash/local/swap/swapoffer_details', $data);
     }
 
+    public function render_swaprequests(renderable $page) {
+        $data = $page->export_for_template($this);
+        return parent::render_from_template('block_stash/local/swap/swap_requests', $data);
+    }
+
 }
