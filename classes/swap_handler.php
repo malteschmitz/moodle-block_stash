@@ -588,9 +588,9 @@ class swap_handler {
         global $DB;
 
         $sql = "SELECT DISTINCT i.id, i.name
-                  FROM mdl_block_stash_items i
-                  JOIN mdl_block_stash_user_items ui ON ui.itemid = i.id
-                  JOIN mdl_block_stash s ON s.id = i.stashid
+                  FROM {block_stash_items} i
+                  JOIN {block_stash_user_items} ui ON ui.itemid = i.id
+                  JOIN {block_stash} s ON s.id = i.stashid
                  WHERE s.courseid = :courseid
                    AND (ui.quantity > 0 AND ui.quantity IS NOT NULL)";
 
