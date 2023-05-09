@@ -14,18 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Version details.
- *
- * @package    block_stash
- * @copyright  2016 Adrian Greeve <adrian@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+namespace block_stash\task;
 
-defined('MOODLE_INTERNAL') || die();
+class swap_tidy_task extends \core\task\scheduled_task {
 
-$plugin->version   = 2022042115;
-$plugin->requires  = 2022112802; // Moodle 4.1.2.
-$plugin->component = 'block_stash';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '2.0.0';
+    /**
+     * Get the name of this task.
+     */
+    public function get_name() {
+        return get_string('tidyswap', 'block_stash');
+    }
+
+    /**
+     * Execute the tidy up task.
+     */
+    public function execute() {
+        global $DB;
+
+        $swapids = $DB->get_records('block_stash_swap', ['status' => \block_stash\swap::BLOCK_STASH_SWAP_COMPLETED]);
+
+        $DB->delete_records_list('block_stash_swap_detail', 'swapid', array_keys($swapids));
+        $DB->delete_records_list('block_stash_swap', 'id', array_keys($swapids));
+    }
+}

@@ -59,7 +59,6 @@ if (!is_null($itemid)) {
     $data['other']['myuserid'] = $USER->id;
 }
 
-
 if (!is_null($userid)) {
     $user = \core_user::get_user($userid);
     $data['id'] = $userid;

@@ -185,6 +185,7 @@ $string['stash:view'] = 'View the stash and its content';
 $string['stashdisabled'] = 'The stash is not enabled. Was the block added to the course?';
 $string['swapnolongerpossible'] = 'This offer is no longer possible, likely because either you or the participant no longer have these items.';
 $string['text'] = 'Text';
+$string['tidyswap'] = 'Remove all trade requests that have been completed.';
 $string['title'] = 'Title';
 $string['to'] = 'To';
 $string['trade'] = 'Trade';

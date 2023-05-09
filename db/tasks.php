@@ -15,17 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Definition of block stash scheduled tasks.
  *
- * @package    block_stash
- * @copyright  2016 Adrian Greeve <adrian@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_stash
+ * @copyright 2023 Adrian Greeve <adriangreeve.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
-
-$plugin->version   = 2022042115;
-$plugin->requires  = 2022112802; // Moodle 4.1.2.
-$plugin->component = 'block_stash';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '2.0.0';
+$tasks = [
+    [
+        'classname' => '\block_stash\task\swap_tidy_task',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '0',
+        'day' => '0',
+        'month' => '*',
+        'dayofweek' => '5'
+    ]
+];
