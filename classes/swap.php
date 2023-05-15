@@ -53,8 +53,8 @@ class swap {
     private $messageformat;
     private $status;
 
-    public function __construct($stashid, $initiator, $receiver, $initiatoritems = [], $receiveritems = [], $message = '',
-            $messageformat = 1, $status = null) {
+    public function __construct(int $stashid, int $initiator, int $receiver, array $initiatoritems = [], array $receiveritems = [],
+            string $message = '', int $messageformat = 1, int $status = null) {
         $this->stashid = $stashid;
         $this->initiator = $initiator;
         $this->receiver = $receiver;
@@ -65,31 +65,46 @@ class swap {
         $this->status = $status;
     }
 
-    public function set_id($id) {
+    /**
+     * Set the swap id.
+     *
+     * @param int $id The swap id.
+     */
+    public function set_id($id) : void {
         $this->id = $id;
     }
 
-    public function set_status($status) {
+    /**
+     * Set the status of the swap.
+     *
+     * @param int $status The status of the swap.
+     */
+    public function set_status($status) : void {
         $this->status = $status;
     }
 
-    public function get_initiator_items() {
+    public function get_initiator_items() : array {
         return $this->initiatoritems;
     }
 
-    public function get_receiver_items() {
+    public function get_receiver_items() : array {
         return $this->receiveritems;
     }
 
-    public function get_receiver_id() {
+    public function get_receiver_id() : int {
         return $this->receiver;
     }
 
-    public function get_initiator_id() {
+    public function get_initiator_id() : int {
         return $this->initiator;
     }
 
-    public function save() {
+    /**
+     * Save the swap.
+     *
+     * @return int The swap id.
+     */
+    public function save() : int {
         global $DB;
         // Save swap.
         $rawdata = (object) [
@@ -117,7 +132,13 @@ class swap {
 
     }
 
-    private function save_detail($swapitems, $swapid) {
+    /**
+     * Save the swap details.
+     *
+     * @param array $swapitems The items to save.
+     * @param int $swapid The swap id.
+     */
+    private function save_detail(array $swapitems, int $swapid) : void {
         global $DB;
         foreach ($swapitems as $items) {
             $data = (object) [
@@ -129,14 +150,24 @@ class swap {
         }
     }
 
-    public function delete() {
+    /**
+     * Delete the whole swap (including details).
+     */
+    public function delete() : void {
         global $DB;
 
         $DB->delete_records(self::TABLE_DETAIL, ['swapid' => $this->id]);
         $DB->delete_records(self::TABLE, ['id' => $this->id]);
     }
 
-    public static function load($swapid, $detailsaswell = false) {
+    /**
+     * Load the swap from an id.
+     *
+     * @param int $swapid The swap id.
+     * @param bool $detailsaswell Whether to load the details as well.
+     * @return \block_stash\swap
+     */
+    public static function load(int $swapid, bool $detailsaswell = false) : swap {
         global $DB;
         $record = $DB->get_record(self::TABLE, ['id' => $swapid]);
         $initiatoritems = [];
