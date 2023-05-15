@@ -1,6 +1,15 @@
 Block Stash
 ===========
 
+Version 2.0.1 (15 May 2023)
+---------------------------
+
+* Fixed a bug selecting items, with updating the database query to not be hardcoded.
+* The user profile is now viewable again.
+* A scheduled task has been added to remove old completed trade requests.
+* Trade headings have been updated to better represent the actual trade.
+* Added a webservice to help with future development in other plugins.
+
 Version 2.0 (19 April 2023)
 ---------------------------
 
