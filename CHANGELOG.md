@@ -1,6 +1,12 @@
 Block Stash
 ===========
 
+Version 2.0.2 (TBD)
+-------------------
+
+* Have added a setting to restrict trading within individual groups. When enabled students can only trade with other students in the groups that they belong to.
+* Stopped the ability to add block_stash to a category, which results in an error.
+
 Version 2.0.1 (15 May 2023)
 ---------------------------
 
