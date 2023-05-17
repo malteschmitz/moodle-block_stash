@@ -61,7 +61,7 @@ class userlist extends external_api {
      * @return array Users and warnings to pass back to the calling widget.
      */
     protected static function get_users_for_search_widget(int $courseid): array {
-        global $DB;
+        global $DB, $USER;
 
 
         $params = self::validate_parameters(
@@ -79,8 +79,22 @@ class userlist extends external_api {
 
         $course = $DB->get_record('course', ['id' => $params['courseid']], '*', MUST_EXIST);
 
-        // Get all enrolled users.
-        $enrolledusers = get_enrolled_users($coursecontext);
+
+        // Just get group members for this course.
+        if ($manager->group_trading_enabled()) {
+            $groupinfo = groups_get_user_groups($course->id, $USER->id);
+            $users = [];
+            foreach ($groupinfo as $groups) {
+                foreach ($groups as $group) {
+                    $userinfo = groups_get_members($group);
+                    $users = array_merge($users, $userinfo);
+                }
+            }
+            $enrolledusers = $users;
+        } else {
+            // If no group mode then get all enrolled users.
+            $enrolledusers = get_enrolled_users($coursecontext);
+        }
 
         $users = [];
         foreach ($enrolledusers as $user) {

@@ -1190,4 +1190,17 @@ class manager {
         }
         return $config->useritemswap;
     }
+
+    /**
+     * Check if group trading is enabled for the Stash block instance in the current context.
+     *
+     * @return bool True if group trading is enabled, false otherwise.
+     */
+    public function group_trading_enabled(): bool {
+        global $DB;
+        $record = $DB->get_record('block_instances', ['parentcontextid' => $this->context->id, 'blockname' => 'stash'],
+                '*', MUST_EXIST);
+        $config = unserialize(base64_decode($record->configdata));
+        return isset($config->grouponly) ? $config->grouponly : false;
+    }
 }

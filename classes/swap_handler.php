@@ -578,7 +578,14 @@ class swap_handler {
         return ($swap->get_initiator_id() == $userid);
     }
 
-    public function get_users_with_item($itemid, $userid) {
+    /**
+     * Get users who have the specified item.
+     *
+     * @param  int $itemid The item id.
+     * @param  int $userid The user id.
+     * @return array Array of users who have the item.
+     */
+    public function get_users_with_item(int $itemid, int $userid): array {
         global $DB;
 
         $fielddata = array_map(function($field) {
@@ -587,14 +594,34 @@ class swap_handler {
 
         $userfields = implode(',', $fielddata);
 
+        $joins = '';
+        $where = '';
+        $groupparams = [];
+        if ($this->manager->group_trading_enabled()) {
+            $groupinfo = groups_get_user_groups($this->courseid, $userid);
+            $coursecontext = $this->manager->get_context();
+            // Groupinfo[0] contains all groups the user is a member of regardless of grouping.
+            $groupjoindata = groups_get_members_join($groupinfo[0], 'ui.userid', $coursecontext);
+            if (!empty($groupjoindata->wheres)) {
+                $where = 'AND ' . $groupjoindata->wheres;
+                $joins = $groupjoindata->joins;
+                $groupparams = $groupjoindata->params;
+            } else {
+                return [];
+            }
+        }
+
         $sql = "SELECT $userfields
                   FROM {block_stash_user_items} ui
                   JOIN {user} u ON ui.userid = u.id
+                  $joins
                  WHERE ui.itemid = :itemid
                    AND ui.quantity <> 0
-                   AND ui.userid <> :userid";
+                   AND ui.userid <> :userid $where";
 
-        return array_values($DB->get_records_sql($sql, ['itemid' => $itemid, 'userid' => $userid]));
+        $params = array_merge(['itemid' => $itemid, 'userid' => $userid], $groupparams);
+
+        return array_values($DB->get_records_sql($sql, $params));
     }
 
     public function get_swappable_items() {
