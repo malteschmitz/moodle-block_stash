@@ -23,11 +23,11 @@
 define([
     'jquery',
     'core/templates',
-    'block_stash/counselor',
     'block_stash/item-dialogue',
     'block_stash/drop',
-    'block_stash/trade'
-], function($, Templates, Counselor, ItemDialogue, Drop, Trade) {
+    'block_stash/trade',
+    'core/pubsub'
+], function($, Templates, ItemDialogue, Drop, Trade, PubSub) {
 
     /**
      * Stash class.
@@ -43,8 +43,8 @@ define([
     StashArea.prototype._userItemTemplate = 'block_stash/user_item';
 
     StashArea.prototype._setUp = function() {
-        Counselor.on(Drop.prototype.EVENT_PICKEDUP, this._dropPickedUpListener.bind(this));
-        Counselor.on(Trade.prototype.EVENT_TRADE, this._dropPickedUpListener.bind(this));
+        PubSub.subscribe('block_stash/drop/pickedup', this._dropPickedUpListener.bind(this));
+        PubSub.subscribe('trade:pickedup', this._dropPickedUpListener.bind(this));
 
         this._setUpUserItemAreClickable();
     };
@@ -81,10 +81,9 @@ define([
      * Listens to drop picked up events.
      *
      * @param {Event} e The event.
-     * @param {Object} data The event data.
      */
-    StashArea.prototype._dropPickedUpListener = function(e, data) {
-        var userItem = data.useritem;
+    StashArea.prototype._dropPickedUpListener = function(e) {
+        var userItem = e.useritem;
         if (this.containsItem(userItem.getItem().get('id'))) {
             this.updateUserItemQuantity(userItem);
         } else {

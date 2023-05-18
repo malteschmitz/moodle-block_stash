@@ -23,11 +23,11 @@
 define([
     'jquery',
     'core/templates',
-    'block_stash/counselor',
     'block_stash/drop',
     'core/notification',
     'block_stash/trade',
-], function($, Templates, Counselor, Drop, notification, Trade) {
+    'core/pubsub'
+], function($, Templates, Drop, notification, Trade, PubSub) {
 
     /**
      * Trade class.
@@ -46,8 +46,8 @@ define([
      * Setup.
      */
     TradeArea.prototype._setUp = function() {
-        Counselor.on(Drop.prototype.EVENT_PICKEDUP, this._dropPickedUpListener.bind(this));
-        Counselor.on(Trade.prototype.EVENT_TRADE, this._dropPickedUpListener.bind(this));
+        PubSub.subscribe('block_stash/drop/pickedup', this._dropPickedUpListener.bind(this));
+        PubSub.subscribe('trade:pickedup', this._dropPickedUpListener.bind(this));
     };
 
     /**
@@ -64,10 +64,9 @@ define([
      * Listens to drop picked up events.
      *
      * @param {Event} e The event.
-     * @param {Object} data The event data.
      */
-    TradeArea.prototype._dropPickedUpListener = function(e, data) {
-        var userItem = data.useritem;
+    TradeArea.prototype._dropPickedUpListener = function(e) {
+        var userItem = e.useritem;
         if (this.containsItem(userItem.getItem().get('id'))) {
             this.updateTradeItemUserQuantity(userItem);
         }

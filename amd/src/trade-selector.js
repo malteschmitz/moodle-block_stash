@@ -21,7 +21,7 @@
  */
 
 import Dialogue from 'block_stash/trade-item-dialogue';
-import Counselor from 'block_stash/counselor';
+import PubSub from 'core/pubsub';
 
 export const init = () => {
     registerActions();
@@ -37,7 +37,7 @@ export const init = () => {
             let dialogue = new Dialogue(courseid, node.dataset.type, title, warnings);
             e.preventDefault();
             dialogue.show(e);
-            Counselor.on('item-save', () => {
+            PubSub.subscribe('item-save', () => {
                 dialogue.close();
                 registerActions();
             });

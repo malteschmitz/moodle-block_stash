@@ -25,10 +25,10 @@ define([
     'core/ajax',
     'core/log',
     'block_stash/base',
-    'block_stash/counselor',
     'block_stash/item',
     'block_stash/user-item',
-], function($, Ajax, Log, Base, Counselor, Item, UserItem) {
+    'core/pubsub'
+], function($, Ajax, Log, Base, Item, UserItem, PubSub) {
 
     /**
      * Drop class.
@@ -91,7 +91,7 @@ define([
         }).then(function(data) {
             // Do not change this._item as it's not a predictable behaviour.
             var userItem = new UserItem(data.useritem, new Item(data.item));
-            Counselor.trigger(this.EVENT_PICKEDUP, {
+            PubSub.publish('block_stash/drop/pickedup', {
                 id: this.get('id'),
                 hashcode: this.get('hashcode'),
                 useritem: userItem

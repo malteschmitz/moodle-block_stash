@@ -45,9 +45,9 @@
 {{#js}}
 require([
     'jquery',
-    'block_stash/counselor',
+    'core/pubsub',
     'core/templates'
-], function($, Counselor, Templates) {
+], function($, PubSub ,Templates) {
     $('#submit').click(function(e) {
         var type = $('.main-window').data('type');
         var itemname = $('#block-stash-item-select option:selected').text();
@@ -79,7 +79,7 @@ require([
             var placeholder = $('.block_stash_item_box[data-type="' + type + '"').find('.block-stash-placeholder');
             $('.block_stash_item_box[data-type="' + type + '"]').append(html);
             placeholder.remove();
-            Counselor.trigger('item-save', []);
+            PubSub.publish('item-save', []);
             e.preventDefault();
         });
     });

@@ -25,11 +25,11 @@ define([
     'core/ajax',
     'core/log',
     'block_stash/base',
-    'block_stash/counselor',
     'block_stash/trade-dialogue',
     'block_stash/item',
     'block_stash/user-item',
-], function($, Ajax, Log, Base, Counselor, Dialogue, Item, UserItem) {
+    'core/pubsub'
+], function($, Ajax, Log, Base, Dialogue, Item, UserItem, PubSub) {
 
     /**
      * Trade class.
@@ -62,7 +62,7 @@ define([
                 for (var index in data.gaineditems) {
 
                     var userItem = new UserItem(data.gaineditems[index].useritem, new Item(data.gaineditems[index].item));
-                    Counselor.trigger(this.EVENT_TRADE, {
+                    PubSub.publish(this.EVENT_TRADE, {
                         id: this.get('id'),
                         hashcode: this.get('hashcode'),
                         useritem: userItem
@@ -71,7 +71,7 @@ define([
 
                 for (var index in data.removeditems) {
                     var userItem = new UserItem(data.removeditems[index].useritem, new Item(data.removeditems[index].item));
-                    Counselor.trigger(this.EVENT_TRADE, {
+                    PubSub.publish(this.EVENT_TRADE, {
                         id: this.get('id'),
                         hashcode: this.get('hashcode'),
                         useritem: userItem
