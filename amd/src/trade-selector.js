@@ -20,30 +20,71 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import Dialogue from 'block_stash/trade-item-dialogue';
-import PubSub from 'core/pubsub';
+import ModalFactory from 'core/modal_factory';
+import ModalEvents from 'core/modal_events';
+import {get_string as getString} from 'core/str';
+import Templates from 'core/templates';
+import Ajax from 'core/ajax';
 
-export const init = () => {
-    registerActions();
-    let warnings = '';
+const showModal = async(e) => {
+    let node = e.currentTarget;
+    let type = node.dataset.type;
+    const modal = await buildModal(type);
+    displayModal(modal, type);
+};
+
+const buildModal = async(tradetype) => {
     let courseelement = document.querySelector('input[name="courseid"]');
     let courseid = courseelement.value;
-    let title = document.querySelector('.additem[data-type="gain"]').getAttribute('title');
-
-    let additemelements = document.getElementsByClassName('additem');
-    for (let additem of additemelements) {
-        additem.addEventListener('click', (e) => {
-            let node = e.currentTarget;
-            let dialogue = new Dialogue(courseid, node.dataset.type, title, warnings);
-            e.preventDefault();
-            dialogue.show(e);
-            PubSub.subscribe('item-save', () => {
-                dialogue.close();
-                registerActions();
-            });
-        });
-    }
+    let context = await getItems(courseid);
+    context.type = tradetype;
+    return ModalFactory.create({
+        title: getString('addnewtradeitem', 'block_stash'),
+        body: Templates.render('block_stash/trade_item_picker', context),
+        type: ModalFactory.types.SAVE_CANCEL
+    });
 };
+
+const displayModal = async(modal, type) => {
+    let savetext = getString('additem', 'block_stash');
+    modal.setSaveButtonText(savetext);
+    modal.getRoot().on(ModalEvents.save, () => {
+        let itemnode = document.querySelector('#block-stash-item-select option:checked');
+        let itemamount = document.getElementById('amount').value;
+        itemamount = parseInt(itemamount);
+        if (!Number.isInteger(itemamount) || itemamount <= 0) {
+            itemamount = 1;
+        }
+
+        let data = {
+            itemid: itemnode.value,
+            imageurl: itemnode.dataset.imgurl,
+            name: itemnode.innerText,
+            quantity: itemamount
+        };
+
+        let templatename = (type === 'gain') ? 'block_stash/trade_add_item_detail' : 'block_stash/trade_loss_item_detail';
+        Templates.render(templatename, data).done((html, js) => {
+            let itemsbox = document.querySelector('.block_stash_item_box[data-type="' + type + '"]');
+            Templates.appendNodeContents(itemsbox, html, js);
+            registerActions();
+        });
+
+        modal.destroy();
+
+    });
+
+    modal.getRoot().on(ModalEvents.hidden, () => {
+        modal.destroy();
+    });
+
+    modal.show();
+};
+
+const getItems = (courseid) => Ajax.call([{
+    methodname: 'block_stash_get_items',
+    args: {courseid: courseid}
+}])[0];
 
 const registerActions = () => {
     let deleteelements = document.getElementsByClassName('block-stash-delete-item');
@@ -57,4 +98,12 @@ const deleteItem = (element) => {
     let parent = child.closest('.block-stash-trade-item');
     parent.remove();
     element.preventDefault();
+};
+
+export const init = () => {
+    registerActions();
+    let additemelements = document.getElementsByClassName('additem');
+    for (let additem of additemelements) {
+        additem.addEventListener('click', showModal);
+    }
 };

@@ -25,11 +25,10 @@ define([
     'core/ajax',
     'core/log',
     'block_stash/base',
-    'block_stash/trade-dialogue',
     'block_stash/item',
     'block_stash/user-item',
     'core/pubsub'
-], function($, Ajax, Log, Base, Dialogue, Item, UserItem, PubSub) {
+], function($, Ajax, Log, Base, Item, UserItem, PubSub) {
 
     /**
      * Trade class.
