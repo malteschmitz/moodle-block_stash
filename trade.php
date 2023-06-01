@@ -87,16 +87,14 @@ $warnings = json_encode($warning ? [$warning] : null);
 $PAGE->requires->js_amd_inline("require([
     'jquery',
     'block_stash/trade',
-    'block_stash/trade-snippet-dialogue',
-], function($, Trade, Dialogue) {
+    'block_stash/trade-snippet-modal'
+], function($, Trade, newModal) {
     var warnings = $warnings;
     $('table.tradestable [rel=block-stash-trade]').click(function(e) {
         var node = $(e.currentTarget),
-            trade = new Trade(node.data('trade')),
-            dialogue = new Dialogue(trade, warnings, $altsnippetmaker);
-
+            trade = new Trade(node.data('trade'));
+        var tester = newModal.init(trade);
         e.preventDefault();
-        dialogue.show(e);
     });
 });", true);
 

@@ -56,7 +56,7 @@
     <div>
         <p><strong>{{#str}}snippet, block_stash{{/str}}</strong></p>
         <div style="display: flex">
-            <textarea id="block-stash-trade-snippet" name="snippet" onclick="this.select();" readonly class="form-control" style="flex: 1; margin: 0"></textarea>
+            <textarea id="block-stash-trade-snippet" name="snippet" onclick="this.select();" readonly class="form-control" style="flex: 1; margin: 0">{{snippet}}</textarea>
             <button id="block-stash-trade-snippet-copy" class="btn btn-secondary" title="{{#str}}copytoclipboard, block_stash{{/str}}">{{#pix}}t/copy, core{{/pix}}</button>
         </div>
         <p><small>{{#str}}copypaste, block_stash{{/str}}</small></p>
@@ -75,21 +75,12 @@
 
 {{#js}}
 require([
-    'jquery',
-    'block_stash/trade',
-    {{#altsnippetmaker}}'{{{.}}}'{{/altsnippetmaker}}
-    {{^altsnippetmaker}}'block_stash/trade-snippet-maker'{{/altsnippetmaker}}
-], function($, Trade, TradeSnippetMaker) {
-    var trade = new Trade({{{tradejson}}});
-    var tsm = new TradeSnippetMaker(trade);
-    var snippetbox = $('#block-stash-trade-snippet');
-    snippetbox.html(tsm.getSnippet());
-
-    $('#block-stash-trade-snippet-copy').click(function(e) {
+], function() {
+    let snippetbox = document.getElementById('block-stash-trade-snippet');
+    document.getElementById('block-stash-trade-snippet-copy').addEventListener('click', (e) => {
         e.preventDefault();
         snippetbox.select();
         document.execCommand("copy");
     });
-
 });
 {{/js}}
