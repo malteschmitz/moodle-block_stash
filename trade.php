@@ -93,6 +93,7 @@ $PAGE->requires->js_amd_inline("require([
     $('table.tradestable [rel=block-stash-trade]').click(function(e) {
         var node = $(e.currentTarget),
             trade = new Trade(node.data('trade'));
+        window.console.log(node.data('trade'));
         var tester = newModal.init(trade);
         e.preventDefault();
     });

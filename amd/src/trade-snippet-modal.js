@@ -36,6 +36,8 @@ const buildModal = async(trade) => {
         trade: trade.getData(),
     };
 
+    window.console.log(context.trade);
+
     context.tradeitems = await getTradeItems(trade);
     let tradesnippetmaker = new TradeSnippet(trade);
     context.snippet = tradesnippetmaker.getSnippet();

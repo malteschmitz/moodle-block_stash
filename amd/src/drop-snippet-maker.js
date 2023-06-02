@@ -144,17 +144,23 @@ define([
 
         if (displaytype == this.IMAGE) {
             display = $('<div class="block-stash-item"></div>');
+            window.console.log(display);
+            window.console.log('display');
             anchor = this._getAnchor();
             anchor.append(this._getDisplayImage());
             display.append(anchor);
 
         } else if (displaytype == this.IMAGEANDBUTTON) {
             display = $('<div class="block-stash-item"></div>');
+            window.console.log(display);
+            window.console.log('display');
             display.append(this._getDisplayImage());
             display.append(this._getDisplayButton());
 
         } else {
             display = $('<span></span>');
+            window.console.log(display);
+            window.console.log('display');
             anchor = this._getAnchor();
             anchor.text(this._getLabel());
             display.append(anchor);

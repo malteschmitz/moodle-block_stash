@@ -56,7 +56,7 @@
         <div>
             <div>
                 <p><strong>{{#str}}snippet, block_stash{{/str}}</strong></p>
-                <textarea name="snippet" onclick="this.select();" readonly class="form-control"></textarea>
+                <textarea name="snippet" onclick="this.select();" readonly class="form-control">{{snippet}}</textarea>
                 <p><small>{{#str}}copypaste, block_stash{{/str}}</small></p>
             </div>
         </div>
@@ -72,7 +72,6 @@
     </div>
     {{/haswarnings}}
 </div>
-
 {{#js}}
 require([
     'block_stash/item',

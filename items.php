@@ -62,26 +62,9 @@ $table->define_baseurl($url);
 echo $table->out(50, false);
 
 list($altsnippetmaker, $warning) = \block_stash\helper::get_alternate_amd_snippet_maker($manager->get_context());
-$altsnippetmaker = json_encode($altsnippetmaker->drop);
-$warnings = json_encode($warning ? [$warning] : null);
+$altsnippetmaker = $altsnippetmaker->drop;
+$warnings = $warning ? [$warning] : null;
 
-$PAGE->requires->js_init_code("require([
-    'jquery',
-    'block_stash/drop',
-    'block_stash/drop-snippet-dialogue',
-    'block_stash/item'
-], function($, Drop, Dialogue, Item) {
-    var altsnippetmaker = $altsnippetmaker,
-        warnings = $warnings;
-    $('table.itemstable [rel=block-stash-drop]').click(function(e) {
-        var node = $(e.currentTarget),
-            item = new Item(node.data('item')),
-            drop = new Drop(node.data('json'), item),
-            dialogue = new Dialogue(drop, warnings, altsnippetmaker);
-
-        e.preventDefault();
-        dialogue.show(e);
-    });
-});", true);
+$PAGE->requires->js_call_amd('block_stash/items', 'init', [$altsnippetmaker, $warnings]);
 
 echo $OUTPUT->footer();
