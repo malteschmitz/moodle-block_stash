@@ -94,5 +94,6 @@ $data['userid'] = $user->id;
 $data['sesskey'] = sesskey();
 
 echo $renderer->render_from_template('block_stash/user_item_reset', $data);
+$PAGE->requires->js_call_amd('block_stash/item-selector-modal', 'init');
 
 echo $OUTPUT->footer();

@@ -89,6 +89,7 @@ $string['itemamountlimit'] = 'Amount limit';
 $string['itemamountlimit_help'] = 'This is the maximum amount of this scarce item available for all students in this course.';
 $string['itemamountupdate'] = 'The number for this item was updated';
 $string['items'] = 'Items';
+$string['itemdeleted'] = 'The item was deleted';
 $string['itemdetail'] = 'Details';
 $string['itemdetail_help'] = 'Details about the item.';
 $string['itemimage'] = 'Image';

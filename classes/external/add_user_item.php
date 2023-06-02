@@ -64,7 +64,12 @@ class add_user_item extends external_api {
         $manager = \block_stash\manager::get($courseid);
         self::validate_context($manager->get_context());
 
-        $manager->update_user_item_amount($itemid, $userid, $quantity);
+        // It is better to create a second webservice for this instead of muddying this code. TODO fix.
+        if ($quantity == 0) {
+            $manager->reset_user_item($userid, $itemid);
+        } else {
+            $manager->update_user_item_amount($itemid, $userid, $quantity);
+        }
 
         return true;
     }

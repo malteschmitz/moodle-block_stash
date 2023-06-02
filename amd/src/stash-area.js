@@ -23,11 +23,11 @@
 define([
     'jquery',
     'core/templates',
-    'block_stash/item-dialogue',
+    'block_stash/item-modal',
     'block_stash/drop',
     'block_stash/trade',
     'core/pubsub'
-], function($, Templates, ItemDialogue, Drop, Trade, PubSub) {
+], function($, Templates, ItemModal, Drop, Trade, PubSub) {
 
     /**
      * Stash class.
@@ -145,9 +145,8 @@ define([
                 return;
             }
 
-            var dialogue = new ItemDialogue(itemId);
+            ItemModal.init(itemId);
             e.preventDefault();
-            dialogue.show(e);
         };
         var selector = '.block-stash-item[aria-haspopup="true"]';
         this._node.find('.item-list').delegate(selector, 'click', handler);
