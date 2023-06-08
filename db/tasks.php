@@ -28,7 +28,7 @@ $tasks = [
         'blocking' => 0,
         'minute' => '0',
         'hour' => '0',
-        'day' => '0',
+        'day' => '*/7',
         'month' => '*',
         'dayofweek' => '5'
     ]
