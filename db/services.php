@@ -117,4 +117,12 @@ $functions = [
         'capabilities' => '',
         'ajax'         => true
     ],
+    'block_stash_add_user_item' => [
+        'classname'    => 'block_stash\\external\\add_user_item',
+        'methodname'   => 'add_user_item',
+        'description'  => 'Add an item to a users stash',
+        'type'         => 'write',
+        'capabilities' => '',
+        'ajax'         => true
+    ],
 ];
