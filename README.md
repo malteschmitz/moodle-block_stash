@@ -46,6 +46,10 @@ Note that teachers cannot pick up the objects, for them they will always re-appe
 4. Once saved click on the trade name and copy the code snippet.
 5. Directly paste the code snippet into any location that has an editor.
 
+### Important!
+
+If you are not using the shortcodes filter (mentioned below) then you must use the ATTO editor to insert the code into the HTML source.
+
 Recommended plugins
 -------------------
 
